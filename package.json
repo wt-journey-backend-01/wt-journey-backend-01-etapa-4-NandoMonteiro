@@ -1,0 +1,31 @@
+{
+  "name": "wt-journey-backend-01-etapa-4-nandomonteiro",
+  "version": "1.0.0",
+  "description": "[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/rskcst-g)\r # Etapa 4: Segurança, Autenticação e Aplicação Completa em Node.js",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-4-NandoMonteiro.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-4-NandoMonteiro/issues"
+  },
+  "homepage": "https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-4-NandoMonteiro#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "knex": "^3.1.0",
+    "pg": "^8.16.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.1.5"
+  }
+}
