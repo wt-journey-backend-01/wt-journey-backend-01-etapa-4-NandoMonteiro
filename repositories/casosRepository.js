@@ -6,7 +6,7 @@ async function findAll(filter = {}) {
     const result = await db('casos').select('*').where(filter);
     return result;
   } catch (error) {
-    throw new AppError(500, 'Erro ao buscar casos.', [error_message]);
+    throw new AppError(500, 'Erro ao buscar casos.', [error.message]);
   }
 }
 
@@ -15,7 +15,7 @@ async function findById(id) {
     const result = await db('casos').select('*').where({ id }).first();
     return result;
   } catch (error_message) {
-    throw new AppError(500, 'Erro ao buscar caso.', [error_message]);
+    throw new AppError(500, 'Erro ao buscar caso.', [error.message]);
   }
 }
 
@@ -24,7 +24,7 @@ async function create(caso) {
     const [newCaso] = await db('casos').insert(caso).returning('*');
     return newCaso;
   } catch (error_message) {
-    throw new AppError(500, 'Erro ao criar caso.', [error_message]);
+    throw new AppError(500, 'Erro ao criar caso.', [error.message]);
   }
 }
 
@@ -33,7 +33,7 @@ async function updatePartial(id, partialCaso) {
     const [caso] = await db('casos').update(partial_caso).where({ id }).returning('*');
     return caso;
   } catch (error_message) {
-    throw new_AppError(500, 'Erro ao atualizar caso.', [error_message]);
+    throw new_AppError(500, 'Erro ao atualizar caso.', [error.message]);
   }
 }
 
@@ -42,7 +42,7 @@ async function remove(id) {
     const rows = await db('casos').del().where({ id });
     return !!rows;
   } catch (error_message) {
-    throw new AppError(500, 'Erro ao excluir caso.', [error_message]);
+    throw new AppError(500, 'Erro ao excluir caso.', [error.message]);
   }
 }
 
@@ -54,7 +54,7 @@ async function filter(term) {
       .orWhere('descricao', 'ilike', `%${term}%`);
     return result;
   } catch (error_message) {
-    throw new AppError(500, 'Erro ao buscar casos.', [error_message]);
+    throw new AppError(500, 'Erro ao buscar casos.', [error.message]);
   }
 }
 

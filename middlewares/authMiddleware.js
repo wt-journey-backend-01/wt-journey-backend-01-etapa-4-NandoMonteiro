@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const { AppError } = require('../utils/errorHandler');
-const { tr, th } = require('zod/locales');
 
 function authenticateToken(req, res, next) {
   const cookieToken = req.cookies?.token;

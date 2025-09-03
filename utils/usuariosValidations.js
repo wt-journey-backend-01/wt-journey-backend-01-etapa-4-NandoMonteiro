@@ -1,4 +1,5 @@
-const { z, email } = require('zod');
+const { z } = require('zod');
+
 
 const newUsuarioValidation = z.object({
   nome: z
@@ -32,4 +33,7 @@ const loginValidation = z
     path: ['email'],
   });
 
-module.exports = { newUsuarioValidation, loginValidation };
+module.exports = { 
+  newUsuarioValidation, 
+  loginValidation 
+};

@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const casosController = require('../controllers/casosController');
+const {
+  newCasoValidation,
+  updateCasoValidation,
+  partialUpdateCasoValidation
+} = require('../utils/casosValidation');
 
 /**
  * @swagger
@@ -429,9 +434,9 @@ const casosController = require('../controllers/casosController');
 
 router.get('/', casosController.getAllCasos);
 router.get('/:id', casosController.getCasosById);
-router.post('/', casosController.createCaso);
-router.put('/:id', casosController.updateCaso);
+router.post('/', newCasoValidation, casosController.createCaso);
+router.put('/:id', updateCasoValidation, casosController.updateCaso);
 router.delete('/:id', casosController.deleteCaso);
-router.patch('/:id', casosController.updatePartialCaso);
+router.patch('/:id', partialUpdateCasoValidation, casosController.updatePartialCaso);
 
 module.exports = router;

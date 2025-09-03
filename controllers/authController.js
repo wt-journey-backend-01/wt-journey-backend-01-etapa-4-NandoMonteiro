@@ -4,7 +4,7 @@ const { newUsuarioValidation, loginValidation } = require('../utils/usuariosVali
 const { createUsuario, findByEmail, findByNome } = require('../repositories/usuariosRepository');
 const { generateToken } = require('../utils/generate-token');
 const { AppError } = require('../utils/errorHandler');
-const { ca } = require('zod/locales');
+
 
 async function register(req, res, next) {
   try {
@@ -34,7 +34,7 @@ async function register(req, res, next) {
     return res.status(201).json({
       status: 201,
       message: 'Usuário registrado com sucesso',
-      user: created,
+      user: createUsuario,
     });
   } catch (err) {
     if (err instanceof AppError) {
