@@ -23,8 +23,8 @@ async function getAllCasos(req, res) {
 async function getCasosById(req, res) {
   const id = Number(req.params.id);
 
-  if (!id || !Number.isInteger(id)) {
-    throw new AppError(404, 'Id inválido.');
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError(400, 'ID inválido.');
   }
 
   const caso = await casosRepository.findById(id);

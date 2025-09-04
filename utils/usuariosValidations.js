@@ -38,5 +38,4 @@ const loginValidation = z
 
 module.exports = { 
   newUsuarioValidation, 
-  loginValidation 
 };

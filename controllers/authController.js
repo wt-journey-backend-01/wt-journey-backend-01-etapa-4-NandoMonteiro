@@ -32,11 +32,9 @@ async function register(req, res, next) {
     const token = generateToken({ id: newUsuario.id, nome: newUsuario.nome });
 
     return res.status(201).json({
-      status: 201,
-      message: 'Usuário registrado com sucesso',
-      user: newUsuario,
       access_token: token,
     });
+    
   } catch (err) {
     if (err instanceof AppError) {
       return next(err);

@@ -22,12 +22,14 @@ async function getAllAgentes(req, res) {
   res.json(agentes);
 }
 
+function isValidId(id) {
+  return Number.isInteger(Number(id)) && Number(id) > 0;
+}
+
 async function getAgenteById(req, res) {
   const id = req.params.id;
-  const agente = await agentesRepository.findById(id);
-
-  if (!agente) {
-    throw new AppError(404, 'Agente não encontrado.');
+  if (!isValidId(id)) {
+    throw new AppError(400, 'ID inválido.');
   }
 
   res.json(agente);

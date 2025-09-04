@@ -8,12 +8,12 @@ function authenticateToken(req, res, next) {
   const token = cookieToken || headerToken;
 
   if (!token) {
-    throw new AppError(401, 'Token de autenticação não fornecido');
+    return next(new AppError(401, 'Token de autenticação não fornecido'));
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      throw new AppError(403, 'Token de autenticação inválido');
+      return next(new AppError(401, 'Token de autenticação inválido'));
     }
     req.user = user;
     next();
