@@ -34,7 +34,7 @@ async function register(req, res, next) {
     return res.status(201).json({
       status: 201,
       message: 'Usuário registrado com sucesso',
-      user: createUsuario,
+      user: newUsuario,
     });
   } catch (err) {
     if (err instanceof AppError) {

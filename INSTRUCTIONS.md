@@ -1,4 +1,4 @@
-# 📁  Estrutura dos Diretórios (pastas) 
+### 📁 Estrutura dos Diretórios (pastas)
 ```
 📦 SEU-REPOSITÓRIO
 │
@@ -7,7 +7,6 @@
 ├── .env
 ├── knexfile.js
 ├── INSTRUCTIONS.md
-
 │
 ├── db/
 │ ├── migrations/
@@ -16,20 +15,24 @@
 │
 ├── routes/
 │ ├── agentesRoutes.js
-│ └── casosRoutes.js
+│ ├── casosRoutes.js
+│ └── authRoutes.js (novo)
 │
 ├── controllers/
 │ ├── agentesController.js
-│ └── casosController.js
+│ ├── casosController.js
+│ └── authController.js (novo)
 │
 ├── repositories/
 │ ├── agentesRepository.js
-│ └── casosRepository.js
+│ ├── casosRepository.js
+│ └── usuariosRepository.js (novo)
+│
+├── middlewares/
+│ └── authMiddleware.js (novo)
 │
 ├── utils/
 │ └── errorHandler.js
-│
-
   
 ```
 

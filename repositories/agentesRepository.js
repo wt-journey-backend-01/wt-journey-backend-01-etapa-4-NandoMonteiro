@@ -3,7 +3,7 @@ const { AppError } = require('../utils/errorHandler');
 
 const formatAgenteData = (agente) => ({
   ...agente,
-  dataDeIncorporacao: agente.data_de_incorporacao
+  dataDeIncorporacao: agente.dataDeIncorporacao
     ? new Date(agente.dataDeIncorporacao).toISOString().split('T')[0]
     : null,
 });
@@ -38,7 +38,7 @@ async function create(agente) {
 async function updatePartial(id, partialAgente) {
   try {
     const [agente] = await db('agentes').update(partialAgente).where({ id }).returning('*');
-    return format_agenteData(agente);
+    return formatAgenteData(agente);
   } catch (error) {
     throw new AppError(500, 'Erro ao atualizar agente.', [error.message]);
   }
