@@ -1,86 +1,39 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 8 créditos restantes para usar o sistema de feedback AI.
+Você tem 7 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para NandoMonteiro:
 
 Nota final: **29.3/100**
 
-Olá, NandoMonteiro! 🚀 Que jornada intensa você enfrentou até aqui! Antes de mais nada, quero parabenizá-lo por todo o esforço e por ter conseguido implementar os pontos essenciais da autenticação, proteção das rotas com JWT, e até mesmo a exclusão de usuários — isso já é um baita avanço! 🎉 Também é muito positivo ver que você estruturou seu projeto respeitando a arquitetura MVC, separando controllers, repositories, rotas e middlewares, o que é fundamental para manter seu código organizado e escalável.
+Olá, NandoMonteiro! 👋🚀
+
+Primeiramente, parabéns pelo esforço até aqui! Você conseguiu implementar várias funcionalidades importantes da aplicação, como o cadastro, login, logout e até a exclusão de usuários com JWT, além de proteger as rotas de agentes e casos com autenticação. Isso já é um baita avanço! 🎉👏
+
+Também é muito legal ver que você estruturou seu projeto seguindo a arquitetura MVC, com controllers, repositories, middlewares e rotas bem organizados. Isso é fundamental para manter o código limpo e escalável. Além disso, você implementou o middleware de autenticação JWT corretamente e o uso do bcrypt para hashing das senhas. Ótimo trabalho! 💪
 
 ---
 
-### 🎯 Conquistas Bônus que você alcançou
-
-- Seu middleware de autenticação está sendo aplicado corretamente nas rotas protegidas de `/agentes` e `/casos`.
-- Você implementou logout limpando o cookie, o que é um ponto extra de segurança.
-- O JWT está sendo gerado com tempo de expiração e retornado no login, além de ser armazenado no cookie HTTP Only.
-- Os endpoints básicos de agentes e casos estão funcionando, com tratamento de erros customizado.
-- A estrutura do seu projeto está muito próxima do esperado, inclusive com o uso do Knex e migrations.
-
-Parabéns por esses avanços! 🎉
+### Agora, vamos analisar com calma os pontos que precisam de atenção para que sua API fique tinindo e você destrave a nota! ⚠️
 
 ---
 
-### 🚩 Agora, vamos analisar os testes que falharam e entender o que está acontecendo para você destravar essas partes.
+## 📌 Principais testes que falharam e análise detalhada
 
----
+### 1. Vários testes de validação do cadastro de usuários (ex: nome vazio, email vazio, senha inválida, senha sem caractere especial, etc.)
 
-## 1. Testes que falharam sobre criação de usuário com dados inválidos (nome vazio, nulo, email vazio, senha sem requisitos etc.)
+**O que está acontecendo?**
 
-**O que o teste espera:**  
-- Que você valide corretamente todos os campos do usuário no registro, garantindo que nome, email e senha estejam presentes e respeitem os critérios (senha forte, email único, etc). Se algum dado estiver faltando ou inválido, deve retornar erro 400.
+No seu controller `authController.js`, você usa o `zod` para validar os dados de entrada com o esquema `newUsuarioValidation`. Isso é ótimo e deveria barrar dados inválidos. Porém, pelo resultado dos testes, parece que sua validação não está cobrindo todos os casos exigidos pelo desafio, ou talvez o esquema `newUsuarioValidation` não esteja implementado com as regras completas.
 
-**O que seu código está fazendo:**  
-- Você usa o Zod para validação via `newUsuarioValidation` no controller, o que é ótimo.
-- Porém, no seu controller `authController.js`, no método `register`, você está retornando no JSON algo estranho:
+Além disso, no seu endpoint de registro, quando a validação falha, você retorna um erro 400 com a mensagem agregada dos erros do Zod, o que está correto. Mas o fato dos testes falharem indica que:
 
-```js
-return res.status(201).json({
-  status: 201,
-  message: 'Usuário registrado com sucesso',
-  user: createUsuario,
-});
-```
+- Ou o esquema não está cobrindo todas as regras (ex: senha com pelo menos uma letra maiúscula, minúscula, número e caractere especial).
+- Ou o middleware de validação não está sendo aplicado corretamente na rota `/auth/register`.
 
-Aqui você está retornando a função `createUsuario` em vez do usuário criado. O correto seria retornar o usuário recém criado, que você já tem na variável `newUsuario`, assim:
+**Como melhorar?**
 
-```js
-return res.status(201).json({
-  status: 201,
-  message: 'Usuário registrado com sucesso',
-  user: newUsuario,
-});
-```
-
-**Por que isso impacta nos testes?**  
-Alguns testes podem estar esperando o objeto do usuário criado com seu id e dados, e se você não retorna corretamente, pode ser interpretado como falha de criação ou problema no payload, o que pode afetar os testes de validação.
-
-**Além disso:**
-
-- Você não está explicitamente validando se os campos estão vazios antes da validação do Zod? O Zod deve fazer isso, mas é importante garantir que o schema está correto (não vi o conteúdo do seu `usuariosValidations.js`).  
-- Certifique-se que o schema do Zod está cobrindo todos os casos de validação, como senha com pelo menos uma letra maiúscula, minúscula, número e caractere especial, e que o nome e email são obrigatórios e não vazios.
-
----
-
-## 2. Testes falhando em `usuarios` por campos faltantes ou inválidos
-
-Outro ponto crítico que pode estar causando erros é a falta da tabela de usuários no banco com as colunas corretas e as constraints necessárias.
-
-Na sua migration, você criou a tabela `usuarios` assim:
-
-```js
-await knex.schema.createTable('usuarios', function (table) {
-  table.increments('id').primary();
-  table.string('nome').notNullable().unique();
-  table.string('email').notNullable().unique();
-  table.string('senha').notNullable();
-});
-```
-
-Está correto, mas atenção: o requisito do desafio pede que a senha tenha validação forte (mínimo 8 caracteres, contendo letras maiúsculas, minúsculas, números e caracteres especiais). Essa validação deve ser feita no código (schema Zod), pois no banco não é possível impor esse tipo de regra.
-
-**Verifique se seu schema Zod para o usuário está assim, por exemplo:**
+- Confirme que o arquivo `usuariosValidations.js` contém um schema Zod que valida todas as regras de senha e campos obrigatórios, algo assim:
 
 ```js
 const newUsuarioValidation = z.object({
@@ -95,160 +48,124 @@ const newUsuarioValidation = z.object({
 });
 ```
 
-Se seu schema não estiver cobrindo esses requisitos, os testes irão falhar.
+- Garanta que esse schema seja usado no middleware de validação (ou dentro do controller) para barrar entradas inválidas antes de tentar criar o usuário.
+
+- Se você estiver validando direto no controller, isso está ok, mas certifique-se que o erro do Zod é capturado e tratado para retornar 400.
+
+**Por que isso é importante?**
+
+Sem essa validação rigorosa, a API aceita dados incompletos ou inseguros, o que quebra os testes e compromete a segurança da aplicação.
 
 ---
 
-## 3. Testes falhando em `usuarios` para email já em uso
+### 2. Erro 400 ao tentar criar usuário com email já em uso
 
-Você tem no controller:
+No seu `authController.js`, você verifica se já existe um email cadastrado:
 
 ```js
 const emailExists = await findByEmail(parsed.email);
-
 if (emailExists) {
   throw new AppError(400, 'Email já cadastrado');
 }
 ```
 
-E o mesmo para o nome de usuário. Muito bom!
+Isso está correto, mas o teste falha indicando que talvez o banco não esteja configurado para garantir a unicidade, ou o teste está esperando uma mensagem específica.
 
-Mas atenção: no seu retorno de erro, você está usando `throw new AppError(400, ...)` dentro do try/catch, e no catch você faz:
+**Verifique:**
 
-```js
-if (err instanceof AppError) {
-  return next(err);
-}
-```
+- Se a migration da tabela `usuarios` tem o campo `email` com `unique()` (vejo que sim, no seu migration: `table.string('email').notNullable().unique();`).
+- Se o seu repositório `findByEmail` está funcionando corretamente (ele parece estar).
+- Se o erro está sendo capturado e retornado com status 400 e mensagem adequada.
 
-Ou seja, o erro está sendo passado para o middleware de erro, o que é correto.
-
-**Mas será que seu middleware de erro está configurado para enviar o status 400 e a mensagem correta?**
-
-Cheque seu `errorHandler.js` para garantir que ele está enviando o status e mensagem corretos. Se ele estiver enviando 500 ou mensagem genérica, os testes falharão.
+Se tudo isso está correto, pode ser que o teste espere a mensagem exata "Email já cadastrado" (que você tem), então está ok.
 
 ---
 
-## 4. Testes falhando na camada de Repositories dos usuários
+### 3. Falha em testes de criação de usuário com campo faltante
 
-Seu arquivo `usuariosRepository.js` está assim:
-
-```js
-const db = require('../db/db');
-
-async function createUsuario(usuario) {
-  const [created] = await db('usuarios').insert(usuario).returning('*');
-  return created;
-}
-
-async function findByEmail(email) {
-  return db('usuarios').where({ email }).first();
-}
-
-async function findByNome(nome) {
-  return db('usuarios').where({ nome }).first();
-}
-```
-
-Está correto e simples, ótimo!
+Isso tem relação direta com o item 1 (validação). Se o esquema não exige todos os campos obrigatórios, o teste falha.
 
 ---
 
-## 5. Problemas no `repositories/agentesRepository.js`
+### 4. Testes bônus que falharam — endpoints de filtragem, busca de usuários logados, etc.
 
-Achei um erro sutil mas que pode causar problemas:
+Você não implementou ainda:
+
+- Endpoint `/usuarios/me` para retornar dados do usuário autenticado.
+- Refresh tokens para prolongar sessão.
+- Filtros avançados para agentes e casos (ex: ordenação por data de incorporação, busca por keywords).
+
+Esses são extras, mas que podem melhorar muito sua nota e a qualidade da aplicação.
+
+---
+
+## ⚠️ Problemas que podem estar impactando a nota geral
+
+### Middleware de autenticação e uso de cookies
+
+No seu `authMiddleware.js`, você tenta pegar o token tanto do cookie quanto do header Authorization:
 
 ```js
-const formatAgenteData = (agente) => ({
-  ...agente,
-  dataDeIncorporacao: agente.data_de_incorporacao
-    ? new Date(agente.dataDeIncorporacao).toISOString().split('T')[0]
-    : null,
+const cookieToken = req.cookies?.token;
+const authHeader = req.headers['authorization'];
+const headerToken = authHeader && authHeader.split(' ')[1];
+const token = cookieToken || headerToken;
+```
+
+Porém, no seu `server.js`, não vi você usando `cookie-parser`. Isso significa que `req.cookies` provavelmente está `undefined` sempre, e o token nunca será lido do cookie.
+
+**O que fazer?**
+
+- Instale e configure o middleware `cookie-parser` no seu `server.js`:
+
+```js
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+```
+
+Sem isso, o token no cookie não será lido, o que pode causar problemas na autenticação.
+
+---
+
+### Mensagem de retorno do login
+
+No seu controller de login, você retorna:
+
+```js
+return res.status(200).json({
+  status: 200,
+  message: 'Login realizado com sucesso',
+  token,
 });
 ```
 
-Aqui você está acessando `agente.data_de_incorporacao` para verificar se existe, mas depois usa `agente.dataDeIncorporacao` para formatar. Isso é inconsistente e pode causar `undefined`.
+Mas o requisito pede que o token seja retornado em um objeto com a chave `access_token`, assim:
 
-Além disso, no método `updatePartial`:
-
-```js
-const [agente] = await db('agentes').update(partialAgente).where({ id }).returning('*');
-return format_agenteData(agente);
-```
-
-Você usou `format_agenteData` com underscore, mas a função declarada é `formatAgenteData` (camelCase). Isso vai gerar um erro de referência.
-
-**Correção:**
-
-```js
-return formatAgenteData(agente);
-```
-
-Esse tipo de erro pode causar erros internos 500 e falha em atualizações.
-
----
-
-## 6. Problemas no `repositories/casosRepository.js`
-
-Aqui tem vários erros de digitação que podem estar causando falhas:
-
-- No catch você usa `error_message`, mas no throw usa `error.message` (variável não declarada). Exemplo:
-
-```js
-} catch (error_message) {
-  throw new AppError(500, 'Erro ao buscar caso.', [error.message]);
+```json
+{
+  "access_token": "token aqui"
 }
 ```
 
-`error` não existe, deveria ser `error_message.message`.
+Isso é importante porque os testes esperam essa estrutura exata.
 
-- No método `updatePartial`:
+**Como corrigir?**
 
-```js
-const [caso] = await db('casos').update(partial_caso).where({ id }).returning('*');
-```
-
-Variável `partial_caso` não está declarada, provavelmente deveria ser `partialCaso`.
-
-- No throw do catch você escreveu `throw new_AppError(...)` com underline, o que não existe.
-
-Esses erros de digitação são fatais e impedem o funcionamento correto dos métodos, causando erros 500.
-
----
-
-## 7. Testes falhando em endpoints bônus (ex: `/usuarios/me`)
-
-Vi que você não implementou o endpoint `/usuarios/me` para retornar os dados do usuário autenticado, o que é um requisito bônus. Isso explica os testes bônus falhando.
-
-Para implementar, você pode criar uma rota e controller simples que retorna `req.user`, buscando o usuário no banco se quiser dados mais completos.
-
----
-
-## 8. Sobre a Estrutura de Diretórios
-
-Sua estrutura está muito boa, respeitando a arquitetura solicitada, com pastas `controllers`, `repositories`, `routes`, `middlewares`, `db`, `utils`, etc.
-
-Só notei que no arquivo `INSTRUCTIONS.md` que você enviou, a pasta `authRoutes.js` e `authController.js` aparecem, mas no seu arquivo `INSTRUCTIONS.md` que mandou, não tem a pasta `routes/authRoutes.js` listada (apenas agentes e casos). Isso pode causar confusão, mas no seu código `server.js` você está importando `authRoutes` corretamente.
-
----
-
-## Recomendações para você avançar com confiança 💡
-
-1. **Corrija os erros de digitação no seu código, principalmente nos repositories de agentes e casos.** São erros simples, mas que quebram a aplicação. Exemplo:
+Mude o retorno para:
 
 ```js
-// Em agentesRepository.js
-return formatAgenteData(agente);
-
-// Em casosRepository.js
-.catch (error) {
-  throw new AppError(500, 'Erro...', [error.message]);
-}
+return res.status(200).json({
+  access_token: token,
+});
 ```
 
-2. **Reveja seu schema de validação Zod para usuários.** Garanta que ele cobre todos os requisitos de senha forte, campos obrigatórios e formatos. Isso vai destravar os testes de validação de criação de usuário.
+Ou, se quiser, pode adicionar outras propriedades, mas o campo `access_token` precisa existir exatamente assim.
 
-3. **No controller de registro, retorne o usuário criado e não a função `createUsuario`.** Exemplo:
+---
+
+### Registro de usuário — retorno esperado
+
+No seu registro, você está retornando:
 
 ```js
 return res.status(201).json({
@@ -258,46 +175,92 @@ return res.status(201).json({
 });
 ```
 
-4. **Cheque seu middleware de tratamento de erros (`errorHandler.js`).** Garanta que ele está enviando o status code e mensagem corretos para erros do tipo `AppError`.
+O requisito pede que o endpoint de registro retorne um objeto com o token JWT, assim como no login? Ou apenas os dados do usuário?
 
-5. **Implemente o endpoint `/usuarios/me` para retornar os dados do usuário autenticado, isso ajuda nos bônus.**
+Pelo enunciado, o registro deve retornar o token JWT (não vi você gerando token no registro).
 
-6. **Teste suas migrations e seeds para garantir que a tabela `usuarios` está criada e populada corretamente.**
+**Como melhorar?**
 
----
+Após criar o usuário, gere o token JWT e retorne no corpo da resposta:
 
-## Recursos que vão te ajudar a corrigir esses pontos:
+```js
+const token = generateToken({ id: newUsuario.id, nome: newUsuario.nome });
 
-- Para validar schemas com Zod e garantir regras complexas de senha:  
-  https://www.youtube.com/watch?v=bGN_xNc4A1k&t=3s (Refatoração e boas práticas)  
-  https://www.youtube.com/watch?v=Q4LQOfYwujk (Autenticação - vídeo feito pelos meus criadores que explica conceitos fundamentais)
+return res.status(201).json({
+  access_token: token,
+});
+```
 
-- Para corrigir erros no uso do Knex e evitar erros de sintaxe:  
-  https://www.youtube.com/watch?v=GLwHSs7t3Ns&t=4s (Guia detalhado do Knex Query Builder)
-
-- Para entender melhor JWT e autenticação segura:  
-  https://www.youtube.com/watch?v=keS0JWOypIU (JWT na prática)  
-  https://www.youtube.com/watch?v=L04Ln97AwoY (Uso de JWT e bcrypt)
-
-- Para configurar banco com Docker e Knex:  
-  https://www.youtube.com/watch?v=uEABDBQV-Ek&t=1s
+Assim, o cliente já recebe o token para autenticar as próximas requisições.
 
 ---
 
-## Resumo rápido dos principais pontos para focar:
+### Validação de senha na migration e na aplicação
 
-- Corrigir erros de digitação e inconsistências nos repositories (ex: `format_agenteData` vs `formatAgenteData`, variáveis mal nomeadas, tratamento de erros com variáveis corretas).  
-- Ajustar retorno do usuário criado no controller de registro (usar o objeto criado, não a função).  
-- Garantir validação rigorosa com Zod para todos os campos do usuário, especialmente senha.  
-- Revisar middleware de erro para garantir respostas corretas e mensagens claras.  
-- Implementar endpoint `/usuarios/me` para dados do usuário autenticado (bônus).  
-- Testar localmente com Postman ou Insomnia para validar fluxos de autenticação e erros.  
+Na migration, você criou a tabela `usuarios` com o campo `senha` como string, mas não há validação no banco para o formato da senha (o que é normal). A validação deve ser feita na aplicação, o que você já tentou com o Zod.
+
+Garanta que o esquema de validação cubra todos os requisitos de senha, conforme explicado no item 1.
 
 ---
 
-Nando, seu projeto está muito bem encaminhado! Com esses ajustes, você vai conseguir destravar a maioria dos testes e entregar uma API segura e profissional. Continue firme, pois a persistência é o caminho para o domínio! 💪✨
+### Estrutura de diretórios
 
-Se precisar, volte e me pergunte que te ajudo a corrigir cada ponto com detalhes! Boa codificação! 🚀👨‍💻👩‍💻
+Sua estrutura está ótima e corresponde ao esperado! 👏
+
+---
+
+## ✨ Pontos positivos e bônus que você já conquistou
+
+- Implementação do middleware de autenticação JWT e proteção das rotas `/agentes` e `/casos` — essencial para segurança.
+- Uso correto do bcrypt para hashing das senhas.
+- Separação clara entre controllers, repositories, rotas e middlewares.
+- Uso do Zod para validação dos dados de entrada (mesmo que precise reforçar as regras).
+- Implementação dos endpoints básicos de registro, login e logout.
+- Documentação Swagger detalhada e bem feita.
+- Configuração do Knex com migrations e seeds para popular os dados.
+- Testes básicos de autenticação estão passando, incluindo exclusão de usuários e logout.
+- Uso do dotenv para variáveis de ambiente e segregação do segredo JWT.
+
+---
+
+## 📚 Recomendações de aprendizado para você
+
+- Para reforçar a validação com Zod e garantir que as regras de senha sejam respeitadas, veja este vídeo:  
+https://www.youtube.com/watch?v=Q4LQOfYwujk (Vídeo feito pelos meus criadores, que fala muito bem sobre autenticação e validações em Node.js)
+
+- Para entender melhor o uso de JWT e como gerar tokens corretamente, recomendo:  
+https://www.youtube.com/watch?v=keS0JWOypIU (JWT na prática)
+
+- Para aprender a configurar o cookie-parser e uso correto de cookies no Express:  
+https://www.npmjs.com/package/cookie-parser (documentação oficial)
+
+- Para entender melhor o Knex e suas migrations, veja:  
+https://www.youtube.com/watch?v=dXWy_aGCW1E (Documentação oficial do Knex.js sobre migrations)
+
+- Para organização e arquitetura MVC no Node.js:  
+https://www.youtube.com/watch?v=bGN_xNc4A1k&t=3s (Refatoração e boas práticas)
+
+---
+
+## 📝 Resumo rápido dos pontos para focar:
+
+- [ ] **Aprimorar a validação de cadastro de usuários** no `usuariosValidations.js` para garantir regras rigorosas de senha, email e nome.
+- [ ] **Gerar e retornar o token JWT no endpoint de registro** para que o cliente já receba o token ao criar usuário.
+- [ ] **Corrigir o formato do JSON retornado no login** para conter o campo `access_token` exatamente como esperado.
+- [ ] **Adicionar o middleware `cookie-parser` no server.js** para que o token enviado via cookie seja lido corretamente.
+- [ ] Conferir mensagens de erro e status codes para garantir que estejam conforme o esperado pelos testes.
+- [ ] Implementar endpoints bônus, como `/usuarios/me` para retornar dados do usuário autenticado, e filtros avançados para agentes e casos, para melhorar sua nota.
+- [ ] Continuar documentando no `INSTRUCTIONS.md` o fluxo de autenticação, uso do token no header e exemplos de requisição.
+
+---
+
+Nando, você está no caminho certo! A segurança e autenticação são temas que exigem atenção a detalhes, especialmente nas validações e no formato das respostas. Com essas melhorias, sua aplicação vai ficar muito mais robusta e alinhada com o que os testes esperam.
+
+Continue firme, revise com calma cada ponto e use os recursos recomendados para aprofundar seu conhecimento. Estou aqui torcendo por você! 🚀🔥
+
+Qualquer dúvida, só chamar que a gente resolve juntos! 😉
+
+Um abraço e bons códigos! 💙👨‍💻👩‍💻
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
