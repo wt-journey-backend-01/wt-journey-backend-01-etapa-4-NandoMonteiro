@@ -9,6 +9,15 @@ class AppError extends Error {
   }
 }
 
+const validate = (schema, req) => {
+    const result = schema.safeParse(req);
+
+    if (!result.success) {
+        const errors = JSON.parse(result.error).map((err) => err.message);
+        throw new AppError(400, 'Parâmetros inválidos', errors || []);
+    }
+};
+
 const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
 
@@ -22,4 +31,4 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = { AppError, errorHandler };
+module.exports = { AppError, errorHandler, validate, };

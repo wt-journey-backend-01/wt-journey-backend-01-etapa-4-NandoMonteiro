@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const { errorHandler } = require('./utils/errorHandler');
 const { authenticateToken } = require('./middlewares/authMiddleware');
 const swagger = require('./docs/swagger.js');
+const cookieParser = require('cookie-parser');
 
 
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/casos", authenticateToken, casosRoutes);
 app.use("/agentes", authenticateToken, agentesRoutes);
 app.use("/auth", authRoutes);
+app.use(cookieParser());
 
 swagger(app);
 

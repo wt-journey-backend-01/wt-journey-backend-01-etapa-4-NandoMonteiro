@@ -1,6 +1,4 @@
 const bcrypt = require('bcryptjs');
-const { z } = require('zod');
-const { newUsuarioValidation, loginValidation } = require('../utils/usuariosValidations');
 const { createUsuario, findByEmail, findByNome } = require('../repositories/usuariosRepository');
 const { generateToken } = require('../utils/generate-token');
 const { AppError } = require('../utils/errorHandler');
@@ -8,7 +6,7 @@ const { AppError } = require('../utils/errorHandler');
 
 async function register(req, res, next) {
   try {
-    const parsed = newUsuarioValidation.parse(req.body);
+    const parsed = req.body;
     const emailExists = await findByEmail(parsed.email);
 
     if (emailExists) {
@@ -31,18 +29,17 @@ async function register(req, res, next) {
 
     const newUsuario = await createUsuario(usuarioToInsert);
 
+    const token = generateToken({ id: newUsuario.id, nome: newUsuario.nome });
+
     return res.status(201).json({
       status: 201,
       message: 'Usuário registrado com sucesso',
       user: newUsuario,
+      access_token: token,
     });
   } catch (err) {
     if (err instanceof AppError) {
       return next(err);
-    }
-
-    if (err instanceof z.ZodError) {
-      return next(new AppError(400, err.errors.map((e) => e.message).join(', ')));
     }
 
     return next(new AppError(500, 'Erro ao registrar usuário'));
@@ -51,7 +48,7 @@ async function register(req, res, next) {
 
 async function login(req, res, next) {
   try {
-    const parsed = loginValidation.parse(req.body);
+    const parsed = req.body;
     let usuario = null;
 
     if (parsed.email) {
@@ -83,17 +80,12 @@ async function login(req, res, next) {
     });
 
     return res.status(200).json({
-      status: 200,
-      message: 'Login realizado com sucesso',
-      token,
+      access_token: token,
     });
+
   } catch (err) {
     if (err instanceof AppError) {
       return next(err);
-    }
-
-    if (err instanceof z.ZodError) {
-      return next(new AppError(400, err.errors.map((e) => e.message).join(', ')));
     }
 
     return next(new AppError(500, 'Erro ao realizar login'));
